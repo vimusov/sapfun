@@ -1,0 +1,13 @@
+[Unit]
+Description=Utility that takes control over your video card coolers to keep it cool and steady.
+After=basic.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/sapfun
+Restart=on-failure
+Nice=-20
+LimitNICE=-20
+
+[Install]
+WantedBy=multi-user.target
