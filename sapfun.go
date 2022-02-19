@@ -32,8 +32,9 @@ import (
 )
 
 const (
-	MaxSpeedTemp     = 75
-	ForceCoolingTemp = 65
+	MaxSpeedTemp     = 80
+	ForceCoolingTemp = 70
+	SlowCoolingTemp  = 65
 	StopCoolingTemp  = 55
 )
 
@@ -142,15 +143,19 @@ func setPWMValue(rootDir string, newValue uint64) {
 func adjustFanSpeed(rootDir string, forceCooling bool) bool {
 	temp := getCurTemp(rootDir)
 	if temp >= MaxSpeedTemp {
-		setPWMValue(rootDir, 255)
+		setPWMValue(rootDir, 255) // ~3600 RPM
 		return true
 	}
 	if temp > ForceCoolingTemp && forceCooling {
-		setPWMValue(rootDir, 255)
+		setPWMValue(rootDir, 255) // ~3600 RPM
 		return true
 	}
+	if temp >= SlowCoolingTemp {
+		setPWMValue(rootDir, 127) // ~2000 RPM
+		return false
+	}
 	if temp >= StopCoolingTemp {
-		setPWMValue(rootDir, 127)
+		setPWMValue(rootDir, 64) // ~800 RPM
 		return false
 	}
 	setPWMValue(rootDir, 0)
