@@ -68,14 +68,19 @@ func writeValue(filePath string, value uint64) {
 }
 
 func findRootDir() string {
-	dirsPaths, err := filepath.Glob("/sys/class/hwmon/hwmon?")
-	if err != nil {
-		log.Fatalf("Unable to enumerate modules, error '%s'.\n", err)
-	}
+	for attempt := 1; attempt < 120; attempt++ {
+		time.Sleep(1 * time.Second)
 
-	for _, dirPath := range dirsPaths {
-		if readValue(filepath.Join(dirPath, "name")) == "amdgpu" {
-			return dirPath
+		dirsPaths, err := filepath.Glob("/sys/class/hwmon/hwmon?")
+		if err != nil {
+			log.Printf("Unable to find module directory, error '%v'\n.", err)
+			continue
+		}
+
+		for _, dirPath := range dirsPaths {
+			if readValue(filepath.Join(dirPath, "name")) == "amdgpu" {
+				return dirPath
+			}
 		}
 	}
 
