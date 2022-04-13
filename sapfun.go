@@ -35,7 +35,8 @@ const (
 	MaxSpeedTemp     = 80
 	ForceCoolingTemp = 70
 	SlowCoolingTemp  = 65
-	StopCoolingTemp  = 57
+	StopCoolingTemp  = 55
+	TempProbesCount  = 5
 )
 
 func readValue(filePath string) string {
@@ -116,6 +117,15 @@ func getCurTemp(rootDir string) uint64 {
 	return 0
 }
 
+func getAvgTemp(rootDir string) uint64 {
+	var avgTemp uint64 = 0
+	for i := 1; i <= TempProbesCount; i++ {
+		avgTemp += getCurTemp(rootDir)
+		time.Sleep(1 * time.Second)
+	}
+	return avgTemp / TempProbesCount
+}
+
 func findFileByMask(rootDir string, mask string) string {
 	filesPaths, err := filepath.Glob(filepath.Join(rootDir, mask))
 	if err != nil {
@@ -146,7 +156,7 @@ func setPWMValue(rootDir string, newValue uint64) {
 }
 
 func adjustFanSpeed(rootDir string, forceCooling bool) bool {
-	temp := getCurTemp(rootDir)
+	temp := getAvgTemp(rootDir)
 	if temp >= MaxSpeedTemp {
 		setPWMValue(rootDir, 255) // ~3600 RPM
 		return true
@@ -170,10 +180,9 @@ func adjustFanSpeed(rootDir string, forceCooling bool) bool {
 func regulateTemp() {
 	rootDir := findRootDir()
 	setManualMode(rootDir)
-	forceCooling := getCurTemp(rootDir) > ForceCoolingTemp
+	forceCooling := getAvgTemp(rootDir) > ForceCoolingTemp
 	for {
 		forceCooling = adjustFanSpeed(rootDir, forceCooling)
-		time.Sleep(5 * time.Second)
 	}
 }
 
