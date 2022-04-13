@@ -35,7 +35,7 @@ const (
 	MaxSpeedTemp     = 80
 	ForceCoolingTemp = 70
 	SlowCoolingTemp  = 65
-	StopCoolingTemp  = 55
+	StopCoolingTemp  = 60
 	TempProbesCount  = 5
 )
 
